@@ -17,7 +17,6 @@ import pickle
 import yaml
 import warnings
 
-
 import mlflow
 from mlflow import pyfunc
 from mlflow.entities.run_status import RunStatus
