@@ -323,7 +323,6 @@ def _backported_all_estimators(type_filter=None):
        the testing utility variant of `all_estimators`.
 
     ========== original docstring ==========
-
     Get a list of all estimators from sklearn.
     This function crawls the module and gets all classes that inherit
     from BaseEstimator. Classes that are defined in test-modules are not
