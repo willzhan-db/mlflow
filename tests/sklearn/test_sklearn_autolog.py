@@ -1,6 +1,5 @@
 import functools
 import inspect
-import logging
 from mock import mock
 import os
 import warnings
