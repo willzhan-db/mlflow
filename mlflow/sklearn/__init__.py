@@ -484,6 +484,7 @@ class _SklearnTrainingSession(object):
         False
         """
         self.allow_children = allow_children
+        print(clazz)
         self.clazz = clazz
         self._parent = None
 
