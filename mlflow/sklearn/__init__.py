@@ -8,12 +8,12 @@ Python (native) `pickle <https://scikit-learn.org/stable/modules/model_persisten
 :py:mod:`mlflow.pyfunc`
     Produced for use by generic pyfunc-based deployment tools and batch inference.
 """
+from distutils.version import LooseVersion
 import functools
 import gorilla
 import os
 import logging
 import pickle
-from packaging import version
 import yaml
 import warnings
 
