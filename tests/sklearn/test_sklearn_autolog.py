@@ -500,7 +500,6 @@ def test_autolog_marks_run_as_failed_when_fit_fails():
     assert get_run(run._info.run_id)._info.status == "FAILED"
 
 
-@pytest.mark.usefixtures(temp_tracking_uri.__name__)
 def test_fit_xxx_performs_logging_only_once(fit_func_name):
     mlflow.sklearn.autolog()
 
