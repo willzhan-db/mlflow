@@ -489,6 +489,7 @@ def test_autolog_emits_warning_message_when_score_fails():
     assert metrics == {}
 
 
+@pytest.mark.usefixtures(temp_tracking_uri.__name__)
 def test_fit_xxx_performs_logging_only_once(fit_func_name):
     mlflow.sklearn.autolog()
 
