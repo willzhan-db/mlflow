@@ -490,7 +490,7 @@ def test_autolog_emits_warning_message_when_score_fails():
     assert metrics == {}
 
 
-def test_run_is_marked_as_failed_when_fit_fails():
+def test_autolog_marks_run_as_failed_when_fit_fails():
     mlflow.sklearn.autolog()
     run = mlflow.start_run()
     model = sklearn.svm.LinearSVC(C=-8).fit(*get_iris())
