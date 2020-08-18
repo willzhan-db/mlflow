@@ -1,5 +1,6 @@
 import functools
 import inspect
+import logging
 from mock import mock
 import os
 import warnings
@@ -130,6 +131,14 @@ def test_force_try_mlflow_log_to_fail():
 def test_no_force_try_mlflow_log_to_fail():
     with mlflow.start_run():
         try_mlflow_log(lambda: 1 / 0)
+
+
+@pytest.fixture(scope="function")
+def use_caplog():
+    logger = logging.getLogger(mlflow.__name__)
+    logger.propagate = True
+    yield
+    logger.propagate = False
 
 
 def test_autolog_preserves_original_function_attributes():
@@ -487,6 +496,16 @@ def test_autolog_emits_warning_message_when_score_fails():
 
     metrics = get_run_data(run.info.run_id)[1]
     assert metrics == {}
+
+
+def test_run_is_marked_as_failed_when_fit_fails():
+    mlflow.sklearn.autolog()
+    run = mlflow.start_run()
+    model = sklearn.svm.LinearSVC(C=-8).fit(*get_iris())
+
+    assert model is None
+    assert mlflow.active_run() is None
+    assert get_run(run._info.run_id)._info.status == "FAILED"
 
 
 @pytest.mark.usefixtures(temp_tracking_uri.__name__)
