@@ -133,14 +133,6 @@ def test_no_force_try_mlflow_log_to_fail():
         try_mlflow_log(lambda: 1 / 0)
 
 
-@pytest.fixture(scope="function")
-def use_caplog():
-    logger = logging.getLogger(mlflow.__name__)
-    logger.propagate = True
-    yield
-    logger.propagate = False
-
-
 def test_autolog_preserves_original_function_attributes():
     def get_func_attrs(f):
         attrs = {}
