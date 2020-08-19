@@ -32,6 +32,7 @@ from mlflow.utils.annotations import experimental
 from mlflow.utils.environment import _mlflow_conda_env
 from mlflow.utils.model_utils import _get_flavor_configuration
 from mlflow.utils.autologging_utils import try_mlflow_log
+from mlflow.utils.validation import MAX_PARAMS_TAGS_PER_BATCH
 
 FLAVOR_NAME = "sklearn"
 
@@ -620,7 +621,7 @@ def autolog():
     """
     import pandas as pd
     import sklearn
-    from mlflow.sklearn.utils import _all_estimators, _get_args_for_score
+    from mlflow.sklearn.utils import _chunk_dict, _get_args_for_score, _all_estimators
 
     from mlflow.models import infer_signature
     from mlflow.sklearn.utils import (
