@@ -27,7 +27,6 @@ from mlflow.models.signature import ModelSignature
 from mlflow.models.utils import ModelInputExample, _save_example
 from mlflow.protos.databricks_pb2 import INVALID_PARAMETER_VALUE, INTERNAL_ERROR
 from mlflow.protos.databricks_pb2 import RESOURCE_ALREADY_EXISTS
-from mlflow.sklearn.utils import _all_estimators
 from mlflow.tracking.artifact_utils import _download_artifact_from_uri
 from mlflow.utils.annotations import experimental
 from mlflow.utils.environment import _mlflow_conda_env
@@ -621,6 +620,7 @@ def autolog():
     """
     import pandas as pd
     import sklearn
+    from mlflow.sklearn.utils import _all_estimators, _get_args_for_score
 
     from mlflow.models import infer_signature
     from mlflow.sklearn.utils import (
