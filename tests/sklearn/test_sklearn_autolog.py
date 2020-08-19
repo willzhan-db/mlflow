@@ -519,8 +519,8 @@ def test_call_fit_with_arguments_score_does_not_accept():
 
     model = sklearn.linear_model.SGDRegressor()
 
-    assert "intercept_init" in get_arg_names(model.fit)
-    assert "intercept_init" not in get_arg_names(model.score)
+    assert "intercept_init" in _get_arg_names(model.fit)
+    assert "intercept_init" not in _get_arg_names(model.score)
 
     with mlflow.start_run():
         Xy = get_iris()
@@ -533,8 +533,8 @@ def test_both_fit_and_score_contain_sample_weight():
     model = sklearn.linear_model.SGDRegressor()
 
     # ensure that we use an appropriate model for this test
-    assert "sample_weight" in get_arg_names(model.fit)
-    assert "sample_weight" in get_arg_names(model.score)
+    assert "sample_weight" in _get_arg_names(model.fit)
+    assert "sample_weight" in _get_arg_names(model.score)
 
     mock_obj = mock.Mock()
 
@@ -558,8 +558,8 @@ def test_only_fit_contains_sample_weight():
 
     model = sklearn.linear_model.RANSACRegressor()
 
-    assert "sample_weight" in get_arg_names(model.fit)
-    assert "sample_weight" not in get_arg_names(model.score)
+    assert "sample_weight" in _get_arg_names(model.fit)
+    assert "sample_weight" not in _get_arg_names(model.score)
 
     mock_obj = mock.Mock()
 
@@ -582,8 +582,8 @@ def test_only_score_contains_sample_weight():
 
     model = sklearn.gaussian_process.GaussianProcessRegressor()
 
-    assert "sample_weight" not in get_arg_names(model.fit)
-    assert "sample_weight" in get_arg_names(model.score)
+    assert "sample_weight" not in _get_arg_names(model.fit)
+    assert "sample_weight" in _get_arg_names(model.score)
 
     mock_obj = mock.Mock()
 
@@ -631,8 +631,8 @@ def test_autolog_emits_warning_message_when_score_fails():
         model = sklearn.cluster.KMeans()
 
         @functools.wraps(model.score)
-        def throwing_score(self, X, y=None, sample_weight=None):
-            raise Exception
+        def throwing_score(X, y=None, sample_weight=None):
+            raise Exception("EXCEPTION")
 
         model.score = throwing_score
         model.fit(*get_iris())
@@ -640,7 +640,7 @@ def test_autolog_emits_warning_message_when_score_fails():
     metrics = get_run_data(run._info.run_id)[1]
     assert metrics == {}
     mock_warning.assert_called_once()
-    assert mock_warning.call_args[0][0].startswith("KMeans.score failed")
+    assert mock_warning.call_args[0][0] == ("KMeans.score failed: EXCEPTION")
 
 
 def test_fit_xxx_performs_logging_only_once(fit_func_name):
