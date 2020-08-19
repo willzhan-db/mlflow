@@ -8,7 +8,6 @@ Python (native) `pickle <https://scikit-learn.org/stable/modules/model_persisten
 :py:mod:`mlflow.pyfunc`
     Produced for use by generic pyfunc-based deployment tools and batch inference.
 """
-from distutils.version import LooseVersion
 import functools
 import gorilla
 import os
@@ -621,7 +620,12 @@ def autolog():
     """
     import pandas as pd
     import sklearn
-    from mlflow.sklearn.utils import _chunk_dict, _get_args_for_score, _all_estimators
+    from mlflow.sklearn.utils import (
+        _is_old_version,
+        _chunk_dict,
+        _get_args_for_score,
+        _all_estimators,
+    )
 
     from mlflow.models import infer_signature
     from mlflow.sklearn.utils import (
