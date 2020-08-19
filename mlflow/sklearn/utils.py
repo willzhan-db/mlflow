@@ -103,7 +103,6 @@ def _get_args_for_score(score_func, fit_func, fit_args, fit_kwargs):
     return Xy
 
 
-
 def _chunk_dict(d, chunk_size):
     # Copied from: https://stackoverflow.com/a/22878842
 
