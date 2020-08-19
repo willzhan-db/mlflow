@@ -489,10 +489,10 @@ def test_autolog_emits_warning_message_when_score_fails():
     assert metrics == {}
 
 
-def test_get_params_returns_dict_with_more_than_100_top_level_keys():
+def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_batch():
     mlflow.sklearn.autolog()
 
-    large_params = {str(i): str(i) for i in range(101)}
+    large_params = {str(i): str(i) for i in range(MAX_PARAMS_TAGS_PER_BATCH + 1)}
     Xy = get_iris()
 
     with mock.patch("sklearn.cluster.KMeans.get_params", return_value=large_params):
@@ -514,10 +514,10 @@ def test_get_params_returns_dict_with_more_than_100_top_level_keys():
     np.testing.assert_array_equal(loaded_model.predict(Xy[0]), model.predict(Xy[0]))
 
 
-def test_get_params_returns_dict_with_value_longer_than_250_chars():
+def test_get_params_returns_dict_with_value_longer_than_max_param_val_length():
     mlflow.sklearn.autolog()
 
-    long_params = {"name": "a" * (250 + 1)}
+    long_params = {"name": "a" * (MAX_PARAM_VAL_LENGTH + 1)}
     Xy = get_iris()
 
     with mock.patch("sklearn.cluster.KMeans.get_params", return_value=long_params):
@@ -527,7 +527,7 @@ def test_get_params_returns_dict_with_value_longer_than_250_chars():
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run._info.run_id)
-    assert params == {"name": "a" * 250}
+    assert params == {"name": "a" * MAX_PARAM_VAL_LENGTH}
     assert metrics == {TRAINING_SCORE: model.score(*Xy)}
     assert tags == {
         ESTIMATOR_NAME: model.__class__.__name__,
