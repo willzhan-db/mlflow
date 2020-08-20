@@ -620,6 +620,7 @@ def autolog():
     import pandas as pd
     import sklearn
     from mlflow.sklearn.utils import (
+        _MIN_SKLEARN_VERSION,
         _is_old_version,
         _chunk_dict,
         _get_args_for_score,
