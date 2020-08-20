@@ -515,7 +515,7 @@ def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_bat
     assert params == large_params
     assert metrics == {TRAINING_SCORE: model.score(*Xy)}
     assert tags == get_expected_class_tags(model)
-    assert "model" in artifacts
+    assert MODEL_DIR in artifacts
 
     loaded_model = load_model_by_run_id(run_id)
     np.testing.assert_array_equal(loaded_model.predict(Xy[0]), model.predict(Xy[0]))
@@ -554,7 +554,7 @@ def test_get_params_returns_dict_whose_key_or_value_exceeds_length_limit(long_pa
     assert params == truncate_dict(long_params)
     assert metrics == {TRAINING_SCORE: model.score(*Xy)}
     assert tags == get_expected_class_tags(model)
-    assert "model" in artifacts
+    assert MODEL_DIR in artifacts
 
     loaded_model = load_model_by_run_id(run_id)
     np.testing.assert_array_equal(loaded_model.predict(Xy[0]), model.predict(Xy[0]))
