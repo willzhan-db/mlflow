@@ -548,7 +548,7 @@ def test_get_params_returns_dict_whose_key_or_value_exceeds_length_limit(long_pa
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run._info.run_id)
-    assert params == _truncate_dict(long_params, MAX_PARAM_KEY_LENGTH, MAX_PARAM_VAL_LENGTH)
+    assert params == truncate_dict(long_params)
     assert metrics == {TRAINING_SCORE: model.score(*Xy)}
     assert tags == {
         ESTIMATOR_NAME: model.__class__.__name__,
