@@ -41,6 +41,9 @@ MODEL_DIR = "model"
 pytestmark = pytest.mark.large
 
 
+pytestmark = pytest.mark.large
+
+
 def get_iris():
     iris = sklearn.datasets.load_iris()
     return iris.data[:, :2], iris.target
