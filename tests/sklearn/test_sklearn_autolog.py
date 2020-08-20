@@ -233,7 +233,6 @@ def test_meta_estimator():
     assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
-<<<<<<< HEAD
     assert_predict_equal(load_model_by_run_id(run_id), model, X)
 
 
@@ -502,9 +501,6 @@ def test_autolog_emits_warning_message_when_score_fails():
 
     metrics = get_run_data(run.info.run_id)[1]
     assert metrics == {}
-=======
-    assert_predict_equal(load_model_by_run_id(run_id), model, Xy[0])
->>>>>>> 132fe985... DRY
 
 
 def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_batch():
