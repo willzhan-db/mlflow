@@ -507,21 +507,21 @@ def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_bat
     mlflow.sklearn.autolog()
 
     large_params = {str(i): str(i) for i in range(MAX_PARAMS_TAGS_PER_BATCH + 1)}
-    Xy = get_iris()
+    X, y = get_iris()
 
     with mock.patch("sklearn.cluster.KMeans.get_params", return_value=large_params):
         with mlflow.start_run() as run:
             model = sklearn.cluster.KMeans()
-            model.fit(*Xy)
+            model.fit(X, y)
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run._info.run_id)
     assert params == large_params
-    assert metrics == {TRAINING_SCORE: model.score(*Xy)}
+    assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     loaded_model = load_model_by_run_id(run_id)
-    assert_predict_equal(loaded_model, model, Xy[0])
+    assert_predict_equal(loaded_model, model, X)
 
 
 @pytest.mark.parametrize(
@@ -541,13 +541,13 @@ def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_bat
 def test_get_params_returns_dict_whose_key_or_value_exceeds_length_limit(long_params, messages):
     mlflow.sklearn.autolog()
 
-    Xy = get_iris()
+    X, y = get_iris()
 
     with mock.patch("sklearn.cluster.KMeans.get_params", return_value=long_params), mock.patch(
         "mlflow.sklearn.utils._logger.warning"
     ) as mock_warning, mlflow.start_run() as run:
         model = sklearn.cluster.KMeans()
-        model.fit(*Xy)
+        model.fit(X, y)
 
     for idx, msg in enumerate(messages):
         assert mock_warning.call_args_list[idx].startswith(msg)
@@ -555,11 +555,11 @@ def test_get_params_returns_dict_whose_key_or_value_exceeds_length_limit(long_pa
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run._info.run_id)
     assert params == truncate_dict(long_params)
-    assert metrics == {TRAINING_SCORE: model.score(*Xy)}
+    assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     loaded_model = load_model_by_run_id(run_id)
-    assert_predict_equal(loaded_model, model, Xy[0])
+    assert_predict_equal(loaded_model, model, X)
 
 
 @pytest.mark.parametrize("pattern", ["only_y_kwarg", "both_kwarg", "both_kwargs_swapped"])
@@ -604,19 +604,19 @@ def test_call_fit_with_arguments_score_does_not_accept():
 
     SGDRegressor.score = mock_score
     model = SGDRegressor()
-    Xy = get_iris()
+    X, y = get_iris()
 
     with mlflow.start_run() as run:
-        model.fit(*Xy, intercept_init=0)
-        mock_obj.assert_called_once_with(*Xy, None)
+        model.fit(X, y, intercept_init=0)
+        mock_obj.assert_called_once_with(X, y, None)
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(*Xy)}
+    assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
-    assert_predict_equal(load_model_by_run_id(run_id), model, Xy[0])
+    assert_predict_equal(load_model_by_run_id(run_id), model, X)
 
 
 @pytest.mark.parametrize("pass_sample_weight_as", ["positional", "keyword"])
@@ -639,23 +639,23 @@ def test_both_fit_and_score_contain_sample_weight(pass_sample_weight_as):
 
     SGDRegressor.score = mock_score
     model = SGDRegressor()
-    Xy = get_iris()
-    sample_weight = abs(np.random.randn(len(Xy[0])))
+    X, y = get_iris()
+    sample_weight = abs(np.random.randn(len(X)))
 
     with mlflow.start_run() as run:
         if pass_sample_weight_as == "positional":
-            model.fit(*Xy, None, None, sample_weight)
+            model.fit(X, y, None, None, sample_weight)
         elif pass_sample_weight_as == "keyword":
-            model.fit(*Xy, sample_weight=sample_weight)
-        mock_obj.assert_called_once_with(*Xy, sample_weight)
+            model.fit(X, y, sample_weight=sample_weight)
+        mock_obj.assert_called_once_with(X, y, sample_weight)
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(*Xy)}
+    assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
-    assert_predict_equal(load_model_by_run_id(run_id), model, Xy[0])
+    assert_predict_equal(load_model_by_run_id(run_id), model, X)
 
 
 def test_only_fit_contains_sample_weight():
@@ -676,19 +676,19 @@ def test_only_fit_contains_sample_weight():
 
     RANSACRegressor.score = mock_score
     model = RANSACRegressor()
-    Xy = get_iris()
+    X, y = get_iris()
 
     with mlflow.start_run() as run:
-        model.fit(*Xy)
-        mock_obj.assert_called_once_with(*Xy)
+        model.fit(X, y)
+        mock_obj.assert_called_once_with(X, y)
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(*Xy)}
+    assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
-    assert_predict_equal(load_model_by_run_id(run_id), model, Xy[0])
+    assert_predict_equal(load_model_by_run_id(run_id), model, X)
 
 
 def test_only_score_contains_sample_weight():
@@ -709,19 +709,19 @@ def test_only_score_contains_sample_weight():
 
     GaussianProcessRegressor.score = mock_score
     model = GaussianProcessRegressor()
-    Xy = get_iris()
+    X, y = get_iris()
 
     with mlflow.start_run() as run:
-        model.fit(*Xy)
-        mock_obj.assert_called_once_with(*Xy, None)
+        model.fit(X, y)
+        mock_obj.assert_called_once_with(X, y, None)
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(*Xy)}
+    assert metrics == {TRAINING_SCORE: model.score(X, y)}
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
-    assert_predict_equal(load_model_by_run_id(run_id), model, Xy[0])
+    assert_predict_equal(load_model_by_run_id(run_id), model, X)
 
 
 def test_autolog_terminates_run_when_active_run_does_not_exist_and_fit_fails():
