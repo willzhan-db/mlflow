@@ -624,9 +624,13 @@ def autolog():
         _chunk_dict,
         _get_args_for_score,
         _all_estimators,
-        _truncate_dict_values,
+        _truncate_dict,
     )
-    from mlflow.utils.validation import MAX_PARAMS_TAGS_PER_BATCH, MAX_PARAM_VAL_LENGTH
+    from mlflow.utils.validation import (
+        MAX_PARAMS_TAGS_PER_BATCH,
+        MAX_PARAM_KEY_LENGTH,
+        MAX_PARAM_VAL_LENGTH,
+    )
 
     from mlflow.models import infer_signature
     from mlflow.sklearn.utils import (

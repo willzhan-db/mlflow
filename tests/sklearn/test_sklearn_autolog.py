@@ -517,20 +517,38 @@ def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_bat
     np.testing.assert_array_equal(loaded_model.predict(Xy[0]), model.predict(Xy[0]))
 
 
-def test_get_params_returns_dict_with_value_longer_than_max_param_val_length():
+@pytest.mark.parametrize(
+    "long_params, messages",
+    [
+        # key exceeds the limit
+        ({("a" * (MAX_PARAM_KEY_LENGTH + 1)): "b"}, ["Truncated the key"]),
+        # value exceeds the limit
+        ({"a": "b" * (MAX_PARAM_VAL_LENGTH + 1)}, ["Truncated the value"]),
+        # both key and value exceed the limit
+        (
+            {("a" * (MAX_PARAM_KEY_LENGTH + 1)): "b" * (MAX_PARAM_VAL_LENGTH + 1)},
+            ["Truncated the key", "Truncated the value"],
+        ),
+    ],
+)
+def test_get_params_returns_dict_whose_key_or_value_exceeds_length_limit(long_params, messages):
     mlflow.sklearn.autolog()
 
-    long_params = {"name": "a" * (MAX_PARAM_VAL_LENGTH + 1)}
     Xy = get_iris()
 
-    with mock.patch("sklearn.cluster.KMeans.get_params", return_value=long_params):
-        with mlflow.start_run() as run:
-            model = sklearn.cluster.KMeans()
-            model.fit(*Xy)
+    # fmt: off
+    with mock.patch("sklearn.cluster.KMeans.get_params", return_value=long_params), \
+         mock.patch("mlflow.sklearn.utils._logger.warning") as mock_warning, \
+         mlflow.start_run() as run:  # noqa
+        model = sklearn.cluster.KMeans()
+        model.fit(*Xy)
+
+    for idx, msg in enumerate(messages):
+        assert mock_warning.call_args_list[idx].startswith(msg)
 
     run_id = run._info.run_id
     params, metrics, tags, artifacts = get_run_data(run._info.run_id)
-    assert params == {"name": "a" * MAX_PARAM_VAL_LENGTH}
+    assert params == _truncate_dict(long_params, MAX_PARAM_KEY_LENGTH, MAX_PARAM_VAL_LENGTH)
     assert metrics == {TRAINING_SCORE: model.score(*Xy)}
     assert tags == {
         ESTIMATOR_NAME: model.__class__.__name__,
