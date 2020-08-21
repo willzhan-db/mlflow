@@ -629,8 +629,8 @@ def autolog():
     )
     from mlflow.utils.validation import (
         MAX_PARAMS_TAGS_PER_BATCH,
-        MAX_PARAM_KEY_LENGTH,
         MAX_PARAM_VAL_LENGTH,
+        MAX_ENTITY_KEY_LENGTH,
     )
 
     from mlflow.models import infer_signature

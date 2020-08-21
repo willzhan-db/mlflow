@@ -528,12 +528,12 @@ def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_bat
     "long_params, messages",
     [
         # key exceeds the limit
-        ({("a" * (MAX_PARAM_KEY_LENGTH + 1)): "b"}, ["Truncated the key"]),
+        ({("a" * (MAX_ENTITY_KEY_LENGTH + 1)): "b"}, ["Truncated the key"]),
         # value exceeds the limit
         ({"a": "b" * (MAX_PARAM_VAL_LENGTH + 1)}, ["Truncated the value"]),
         # both key and value exceed the limit
         (
-            {("a" * (MAX_PARAM_KEY_LENGTH + 1)): "b" * (MAX_PARAM_VAL_LENGTH + 1)},
+            {("a" * (MAX_ENTITY_KEY_LENGTH + 1)): "b" * (MAX_PARAM_VAL_LENGTH + 1)},
             ["Truncated the key", "Truncated the value"],
         ),
     ],
