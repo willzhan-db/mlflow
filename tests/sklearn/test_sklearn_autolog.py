@@ -597,6 +597,7 @@ def test_call_fit_with_arguments_score_does_not_accept():
     mock_obj = mock.Mock()
 
     def mock_score(self, X, y, sample_weight=None):
+        # pylint: disable=unused-argument
         mock_obj(X, y, sample_weight)
         return 0
 
@@ -632,6 +633,7 @@ def test_both_fit_and_score_contain_sample_weight(pass_sample_weight_as):
     mock_obj = mock.Mock()
 
     def mock_score(self, X, y, sample_weight=None):
+        # pylint: disable=unused-argument
         mock_obj(X, y, sample_weight)
         return 0
 
@@ -669,6 +671,7 @@ def test_only_fit_contains_sample_weight():
     mock_obj = mock.Mock()
 
     def mock_score(self, X, y):
+        # pylint: disable=unused-argument
         mock_obj(X, y)
         return 0
 
@@ -702,6 +705,7 @@ def test_only_score_contains_sample_weight():
     mock_obj = mock.Mock()
 
     def mock_score(self, X, y, sample_weight=None):
+        # pylint: disable=unused-argument
         mock_obj(X, y, sample_weight)
         return 0
 
