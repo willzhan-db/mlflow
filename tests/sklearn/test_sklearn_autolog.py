@@ -596,8 +596,7 @@ def test_call_fit_with_arguments_score_does_not_accept():
 
     mock_obj = mock.Mock()
 
-    def mock_score(self, X, y, sample_weight=None):
-        # pylint: disable=unused-argument
+    def mock_score(self, X, y, sample_weight=None):  # pylint: disable=unused-argument
         mock_obj(X, y, sample_weight)
         return 0
 
@@ -632,8 +631,7 @@ def test_both_fit_and_score_contain_sample_weight(sample_weight_passed_as):
 
     mock_obj = mock.Mock()
 
-    def mock_score(self, X, y, sample_weight=None):
-        # pylint: disable=unused-argument
+    def mock_score(self, X, y, sample_weight=None):  # pylint: disable=unused-argument
         mock_obj(X, y, sample_weight)
         return 0
 
@@ -670,8 +668,7 @@ def test_only_fit_contains_sample_weight():
 
     mock_obj = mock.Mock()
 
-    def mock_score(self, X, y):
-        # pylint: disable=unused-argument
+    def mock_score(self, X, y):  # pylint: disable=unused-argument
         mock_obj(X, y)
         return 0
 
@@ -704,8 +701,7 @@ def test_only_score_contains_sample_weight():
 
     mock_obj = mock.Mock()
 
-    def mock_score(self, X, y, sample_weight=None):
-        # pylint: disable=unused-argument
+    def mock_score(self, X, y, sample_weight=None):  # pylint: disable=unused-argument
         mock_obj(X, y, sample_weight)
         return 0
 
@@ -757,8 +753,7 @@ def test_autolog_emits_warning_message_when_score_fails():
     model = sklearn.cluster.KMeans()
 
     @functools.wraps(model.score)
-    def throwing_score(X, y=None, sample_weight=None):
-        # pylint: disable=unused-argument
+    def throwing_score(X, y=None, sample_weight=None):  # pylint: disable=unused-argument
         raise Exception("EXCEPTION")
 
     model.score = throwing_score
