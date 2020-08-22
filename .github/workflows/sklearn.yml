@@ -48,5 +48,6 @@ jobs:
         run: |
           python -c "import sklearn; print(sklearn.__version__)"
       - name: Run tests
+        continue-on-error: ${{ steps.check-version.outputs.supported != 'True' }}
         run: |
           pytest --verbose --large tests/sklearn/test_sklearn_autolog.py
