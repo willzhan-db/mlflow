@@ -624,6 +624,7 @@ def autolog():
         _is_supported_version,
         _chunk_dict,
         _get_args_for_score,
+        _get_args_for_accuracy_score_classifier,
         _all_estimators,
         _truncate_dict,
     )
@@ -665,6 +666,10 @@ def autolog():
             stacklevel=2,
         )
 
+    _CLASSIFIER = "classifier"
+    _REGRESSOR = "regressor"
+    _CLUSTERER = "clusterer"
+
     def fit_mlflow(self, func_name, *args, **kwargs):
         should_start_run = mlflow.active_run() is None
         if should_start_run:
@@ -673,6 +678,9 @@ def autolog():
         _log_pretraining_metadata(self, *args, **kwargs)
 
         original_fit = gorilla.get_original_attribute(self, func_name)
+
+        # Always apply fit function to get the trained model
+        trained_model = self.fit(*args, **kwargs)
         try:
             fit_output = original_fit(*args, **kwargs)
         except Exception as e:
