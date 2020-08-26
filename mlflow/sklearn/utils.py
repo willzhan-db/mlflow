@@ -34,10 +34,7 @@ _logger = logging.getLogger(__name__)
 # on scikit-learn older than this version.
 _MIN_SKLEARN_VERSION = "0.20.3"
 
-_NORMALIZE = "normalize"
 _SAMPLE_WEIGHT = "sample_weight"
-
-client = mlflow.tracking.MlflowClient()
 
 
 def _get_estimator_info_tags(estimator):
