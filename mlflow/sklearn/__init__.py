@@ -624,7 +624,9 @@ def autolog():
         _is_supported_version,
         _chunk_dict,
         _get_args_for_score,
-        _log_accuracy_score_classifier,
+        _log_classifier_metrics,
+        _log_regressor_metrics,
+        log_clusterer_metrics,
         _all_estimators,
         _truncate_dict,
     )
