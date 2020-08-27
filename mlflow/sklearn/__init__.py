@@ -674,7 +674,6 @@ def autolog():
         _log_pretraining_metadata(self, *args, **kwargs)
 
         original_fit = gorilla.get_original_attribute(self, func_name)
-
         try:
             fit_output = original_fit(*args, **kwargs)
         except Exception as e:
