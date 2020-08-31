@@ -647,6 +647,7 @@ def autolog():
         _is_supported_version,
         _chunk_dict,
         _get_args_for_score,
+        _log_specialized_estimator_content,
         _get_Xy,
         _all_estimators,
         _truncate_dict,
@@ -750,6 +751,9 @@ def autolog():
                 _logger.warning(msg)
             else:
                 try_mlflow_log(mlflow.log_metric, "training_score", training_score)
+
+        # log common metrics and artifacts for estimators (classifier, regressor)
+        _log_specialized_estimator_content(estimator, mlflow.active_run().info.run_id, args, kwargs)
 
         input_example = None
         signature = None

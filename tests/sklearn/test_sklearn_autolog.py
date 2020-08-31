@@ -319,7 +319,7 @@ def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_bat
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run.info.run_id)
     assert params == large_params
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     loaded_model = load_model_by_run_id(run_id)
@@ -357,7 +357,7 @@ def test_get_params_returns_dict_whose_key_or_value_exceeds_length_limit(long_pa
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run.info.run_id)
     assert params == truncate_dict(long_params)
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     loaded_model = load_model_by_run_id(run_id)
@@ -382,7 +382,7 @@ def test_fit_takes_Xy_as_keyword_arguments(Xy_passed_as):
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     assert_predict_equal(load_model_by_run_id(run_id), model, X)
@@ -415,7 +415,7 @@ def test_call_fit_with_arguments_score_does_not_accept():
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     assert_predict_equal(load_model_by_run_id(run_id), model, X)
@@ -454,7 +454,7 @@ def test_both_fit_and_score_contain_sample_weight(sample_weight_passed_as):
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     assert_predict_equal(load_model_by_run_id(run_id), model, X)
@@ -487,7 +487,7 @@ def test_only_fit_contains_sample_weight():
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     assert_predict_equal(load_model_by_run_id(run_id), model, X)
@@ -520,7 +520,7 @@ def test_only_score_contains_sample_weight():
     run_id = run.info.run_id
     params, metrics, tags, artifacts = get_run_data(run_id)
     assert params == truncate_dict(stringify_dict_values(model.get_params(deep=True)))
-    assert metrics == {TRAINING_SCORE: model.score(X, y)}
+    assert {TRAINING_SCORE: model.score(X, y)}.items() <= metrics.items()
     assert tags == get_expected_class_tags(model)
     assert MODEL_DIR in artifacts
     assert_predict_equal(load_model_by_run_id(run_id), model, X)
@@ -560,7 +560,7 @@ def test_autolog_emits_warning_message_when_score_fails():
 
     model.score = throwing_score
 
-    with mlflow.start_run() as run, mock.patch("mlflow.sklearn._logger.warning") as mock_warning:
+    with mlflow.start_run(), mock.patch("mlflow.sklearn._logger.warning") as mock_warning:
         model.fit(*get_iris())
         mock_warning.assert_called_once()
         mock_warning.called_once_with(
@@ -568,8 +568,64 @@ def test_autolog_emits_warning_message_when_score_fails():
             "Scoring error: EXCEPTION"
         )
 
-    metrics = get_run_data(run.info.run_id)[1]
-    assert metrics == {}
+
+def test_autolog_emits_warning_message_when_metric_fails():
+    """
+    Take precision_score metric from SVC as an example to test metric logging failure
+    """
+    mlflow.sklearn.autolog()
+
+    model = sklearn.svm.SVC()
+
+    @functools.wraps(sklearn.metrics.precision_score)
+    def throwing_metrics(y_true, y_pred):  # pylint: disable=unused-argument
+        raise Exception("EXCEPTION")
+
+    sklearn.metrics.precision_score = throwing_metrics
+
+    with mlflow.start_run(), mock.patch("mlflow.sklearn.utils._logger.warning") as mock_warning:
+        model.fit(*get_iris())
+        mock_warning.assert_called_once()
+        mock_warning.called_once_with(
+            "SVC.precision_score failed. "
+            "The 'precision_score' metric will not be recorded. "
+            "Metric error: EXCEPTION"
+        )
+
+
+def test_autolog_emits_warning_message_when_model_prediction_fails():
+    """
+    Take GridSearchCV as an example, whose base class is "classifier" and will go
+    through classifier's metric logging. When refit=False, the model will never get
+    refitted, while during the metric logging what ".predict()" expects is a fitted model.
+    Thus, a warning will be logged.
+    """
+    mlflow.sklearn.autolog()
+
+    metrics_size = 2
+    metrics_to_log = {
+        "score_{}".format(i): sklearn.metrics.make_scorer(lambda y, y_pred, **kwargs: 10)
+        for i in range(metrics_size)
+    }
+
+    @functools.wraps(sklearn.model_selection.GridSearchCV.predict)
+    def throwing_predict(X):  # pylint: disable=unused-argument
+        raise Exception("EXCEPTION")
+
+    sklearn.model_selection.GridSearchCV.predict = throwing_predict
+
+    with mlflow.start_run(), mock.patch("mlflow.sklearn.utils._logger.warning") as mock_warning:
+        svc = sklearn.svm.SVC()
+        cv_model = sklearn.model_selection.GridSearchCV(
+            svc, {"C": [1]}, n_jobs=1, scoring=metrics_to_log, refit=False
+        )
+        cv_model.fit(*get_iris())
+        mock_warning.assert_called_once()
+        mock_warning.called_once_with(
+            "Failed to autolog metrics for "
+            + sklearn.model_selection.GridSearchCV.__class__.__name__
+            + ". Logging error: EXCEPTION"
+        )
 
 
 def test_get_params_returns_dict_that_has_more_keys_than_max_params_tags_per_batch():
