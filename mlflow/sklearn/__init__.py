@@ -777,6 +777,9 @@ def autolog():
             input_example=input_example,
         )
 
+        # log common metrics and artifacts for estimators (classifier, regressor)
+        _log_specialized_estimator_content(estimator, mlflow.active_run().info.run_id, args, kwargs)
+
         if _is_parameter_search_estimator(estimator):
             if hasattr(estimator, "best_estimator_"):
                 try_mlflow_log(
