@@ -626,20 +626,6 @@ def autolog():
     """
     import pandas as pd
     import sklearn
-    from mlflow.sklearn.utils import (
-        _MIN_SKLEARN_VERSION,
-        _is_supported_version,
-        _chunk_dict,
-        _get_args_for_score,
-        _log_specialized_estimator_content,
-        _all_estimators,
-        _truncate_dict,
-    )
-    from mlflow.utils.validation import (
-        MAX_PARAMS_TAGS_PER_BATCH,
-        MAX_PARAM_VAL_LENGTH,
-        MAX_ENTITY_KEY_LENGTH,
-    )
 
     from mlflow.models import infer_signature
     from mlflow.sklearn.utils import (
@@ -780,9 +766,6 @@ def autolog():
             signature=signature,
             input_example=input_example,
         )
-
-        # log common metrics and artifacts for estimators (classifier, regressor)
-        _log_specialized_estimator_content(estimator, mlflow.active_run().info.run_id, args, kwargs)
 
         if _is_parameter_search_estimator(estimator):
             if hasattr(estimator, "best_estimator_"):
