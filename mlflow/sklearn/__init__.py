@@ -531,6 +531,13 @@ def autolog():
       **Metrics**
         - A training score obtained by ``estimator.score``. Note that the training score is
           computed using parameters given to ``fit()``.
+        - Common metrics for classifier:
+          (1) precision score. (2) recall score. (3) f1_score. (4) accuracy score.
+          If the classifier has method `predict_proba`, we additionally log:
+          (5) log loss. (6) roc_auc_score
+        - Common metrics for regressor:
+          (1) root mean squared error. (2) mean squared error. (3) mean absolute error.
+          (3) r2 score.
 
       **Tags**
         - An estimator class name (e.g. "LinearRegression").
