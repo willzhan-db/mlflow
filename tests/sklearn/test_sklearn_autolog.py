@@ -595,12 +595,14 @@ def test_autolog_emits_warning_message_when_model_prediction_fails():
     }
 
     @functools.wraps(sklearn.model_selection.GridSearchCV.predict)
-    def throwing_predict(X):  # pylint: disable=unused-argument
+    def throwing_predict():  # pylint: disable=unused-argument
         raise Exception("EXCEPTION")
 
-    sklearn.model_selection.GridSearchCV.predict = throwing_predict
-
-    with mlflow.start_run(), mock.patch("mlflow.sklearn.utils._logger.warning") as mock_warning:
+    with mlflow.start_run(), mock.patch(
+        "mlflow.sklearn.utils._logger.warning"
+    ) as mock_warning, mock.patch(
+        "sklearn.model_selection.GridSearchCV.predict", side_effect=throwing_predict
+    ):
         svc = sklearn.svm.SVC()
         cv_model = sklearn.model_selection.GridSearchCV(
             svc, {"C": [1]}, n_jobs=1, scoring=metrics_to_log, refit=False
